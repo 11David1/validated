@@ -2,20 +2,22 @@ class Validated:
 
     def __init__(self, **kwargs):
 
-        for element in kwargs.items():
-            setattr(self, self.name, self.value)
+        for name, value in kwargs.items():
+            setattr(self, name, value)
 
     def __str__(self):
-        pass
+        return f"{self.__class__.__name__}({self.__dict__})"
 
 
 class Field:
     def __set__(self, obj, value):
         if self.validate(value):
-            setattr(obj, self.internale_name, value)
+            obj.__dict__[self.internale_name] = value
 
     def __get__(self, obj, instance):
-        return getattr(obj, self.internale_name)
+        if obj is None:
+            return self
+        return obj.__dict__[self.internale_name]
 
     def __set_name__(self, owner, name):
         self.name = name
@@ -36,6 +38,9 @@ class Integer(Field):
         raise ValueError(
             f"{self.name} muss zwischen {self.min_value} und {self.max_value} sein"
         )
+        # TODO die Fehlermeldung muss zwischen  verschiedenen Fehlern z.B. TypeError (wenn man zwanzig eingibt)
+        # und ValueError (also z.B. größer als max_value) richtig unterscheiden und den richtigen Fehler ausgeben
+        # gerade gibt er bei "zwanzig" noch ""ValueError: age muss zwischen 0 und 150 sein" aus.
 
 
 class String(Field):
